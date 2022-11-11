@@ -1,20 +1,23 @@
 from stack import Stack
-from operations import split_exp, shunting_yard
+from operations import split_exp, infix_to_rpn, eval_rpn
 
 def main():
+    ops = {
+        "!": lambda x : not x,
+        "&": lambda x, y : x and y,
+        "|": lambda x, y : x or y,
+    }
+
+    infix = input()
+    infix = split_exp(infix, ops)
+    rpn = infix_to_rpn(infix, ops)
+
     head, items = get_items("songs.tsv")
 
-    unary_ops = "!"
-    binary_ops = "&|"
-    infix = input()
-    infix = split_exp(infix, unary_ops+binary_ops)
-    rpn = shunting_yard(infix, unary_ops, binary_ops)
-
-    name, _, tags = head
-    print(name, tags, sep="\t")
+    print("\t".join(head))
     for name, by, tags in items:
-        if eval_rpn(rpn, tags):
-            print(name, " ".join(tags), sep="\t")
+        if eval_rpn(rpn, ops, lambda x : x in tags):
+            print(name, ", ".join(by), " ".join(tags), sep="\t")
 
 def get_items(fname):
     items = []
@@ -26,23 +29,6 @@ def get_items(fname):
             tags = set(tags.split(","))
             items.append((name, by, tags))
     return head, items
-
-def eval_rpn(rpn, tags):
-    stk = Stack()
-    for t in rpn.split(" "):
-        if t == "!":
-            stk.push(not stk.pop())
-        elif t == "&":
-            x, y = stk.pop(), stk.pop()
-            stk.push(x and y)
-        elif t == "|":
-            x, y = stk.pop(), stk.pop()
-            stk.push(x or y)
-        else:
-            stk.push(t in tags)
-    out = stk.pop()
-    assert stk.is_empty(), f"wtf stk={str(stk)} is not empty"
-    return out
 
 if __name__ == "__main__":
     main()

@@ -1,93 +1,121 @@
+from inspect import signature
 from stack import Stack
 
-def main():
-    unary_ops = ""
-    binary_ops = "+-*/%"
-    #infix = "1+2+(3+4+(5+6)+7+(8+(9)))+2+3+(3+(3+(3+((3+3)+3)+3)+3))"
-    infix = input()
-    infix = split_exp(infix, unary_ops+binary_ops)
-    rpn = shunting_yard(infix, unary_ops, binary_ops)
-    print(rpn)
-    print(eval_rpn(rpn))
+# Operations are in reverse
+# because items are popped in reverse
+MATH_OPS = {
+    "+": lambda x, y : y+x,
+    "-": lambda x, y : y-x,
+    "*": lambda x, y : y*x,
+    "/": lambda x, y : y/x,
+    "%": lambda x, y : y%x,
+}
+BOOL_OPS = {
+    "!": lambda x : not x,
+    "&": lambda x, y : y and x,
+    "|": lambda x, y : y or x,
+}
 
-def split_exp(s, ops):
-    out = []
+def main():
+    infix = input()
+    infix = "1+2+(3+4+(5+6)+7+(8+(9)))+2+3+(3+(3+(3+((3+3)+3)+3)+3))" \
+        if infix == "" else infix
+    infix = split_exp(infix, MATH_OPS)
+    rpn = infix_to_rpn(infix, MATH_OPS)
+    print(" ".join(rpn))
+    print(eval_rpn(rpn, MATH_OPS, float))
+
+def split_exp(exp, ops):
+    """
+    split expression into tokens
+    exp: str, typically in infix notation
+    ops: iterable<str>
+    return: list<str>
+    """
+    tokens = []
     curr = ""
-    for c in s:
+    for c in exp:
         if c == " ":
             if curr != "":
-                out.append(curr)
+                tokens.append(curr)
             curr = ""
-        elif c in ops+"()":
+            continue
+        if c in ops or c in "()":
             if curr != "":
-                out.append(curr)
-            out.append(c)
+                tokens.append(curr)
+            tokens.append(c)
             curr = ""
-        else:
-            curr += c
+            continue
+        curr += c
     if curr != "":
-        out.append(curr)
-    return out
+        tokens.append(curr)
+    return tokens
 
-def shunting_yard(tokens, unary_ops, binary_ops):
-    out = []
-    ops = Stack()
+def infix_to_rpn(tokens, ops):
+    """
+    convert list of tokens of expression in infix notation
+    to reverse Polish notation (RPN)
+    using shunting yard algorithm invented by Edsger Dijkstra;
+    see <https://en.wikipedia.org/wiki/Shunting_yard_algorithm?oldid=1102884909#The_algorithm_in_detail>
+    tokens: iterable<str>
+    ops: dict<str, function>
+    return: list<str>
+    """
+    rpn = []
+    ops_stk = Stack() # operators stack
     for t in tokens:
-        if t in unary_ops:
-            ops.push(t)
-        elif t in binary_ops:
+        if t in ops and get_nargs(ops[t])==1:
+            ops_stk.push(t)
+            continue
+        if t in ops and get_nargs(ops[t])==2:
+            while not ops_stk.is_empty() and ops_stk.peek() != "(":
+                rpn.append(ops_stk.pop())
+            ops_stk.push(t)
+            continue
+        if t == "(":
+            ops_stk.push(t)
+            continue
+        if t == ")":
             while True:
-                if ops.is_empty():
+                assert not ops_stk.is_empty()
+                if ops_stk.peek() == "(":
                     break
-                if ops.peek() == "(":
-                    break
-                out.append(ops.pop())
-            ops.push(t)
-        elif t == "(":
-            ops.push(t)
-        elif t == ")":
-            while True:
-                assert not ops.is_empty()
-                if ops.peek() == "(":
-                    break
-                out.append(ops.pop())
-            assert ops.pop() == "("
-            if not ops.is_empty and ops.peek() in unary_ops:
-                out.append(ops.pop())
-        else:
-            out.append(t)
-
-    while not ops.is_empty():
-        op = ops.pop()
+                rpn.append(ops_stk.pop())
+            assert ops_stk.pop() == "("
+            if not ops_stk.is_empty() and \
+                ops_stk.peek() in ops and get_nargs(ops[ops_stk.peek()])==1:
+                rpn.append(ops_stk.pop())
+            continue
+        rpn.append(t)
+    while not ops_stk.is_empty():
+        op = ops_stk.pop()
         assert op != "("
-        out.append(op)
+        rpn.append(op)
+    return rpn
 
-    return " ".join(out)
+def get_nargs(f):
+    """
+    get number of arguments of f
+    f: function
+    return: int
+    """
+    return len(signature(f).parameters)
 
-def eval_rpn(rpn):
+def eval_rpn(rpn, ops, f = lambda x : x):
+    """
+    evaluate expression in RPN
+    rpn: iterable<str>
+    ops: dict<str, function>
+    f: function, apply f to each non-operator token
+    return: object
+    """
     stk = Stack()
-    for t in rpn.split(" "):
-        if op == "+":
-            x, y = float(stk.pop()), float(stk.pop())
-            stk.push(x + y)
+    for t in rpn:
+        if t in ops:
+            args = (stk.pop() for _ in range(get_nargs(ops[t])))
+            stk.push(ops[t](*args))
             continue
-        if op == "-":
-            x, y = float(stk.pop()), float(stk.pop())
-            stk.push(x - y)
-            continue
-        if op == "*":
-            x, y = float(stk.pop()), float(stk.pop())
-            stk.push(x * y)
-            continue
-        if op == "/":
-            x, y = float(stk.pop()), float(stk.pop())
-            stk.push(x / y)
-            continue
-        if op == "%":
-            x, y = float(stk.pop()), float(stk.pop())
-            stk.push(x % y)
-            continue
-        stk.push(t)
+        stk.push(f(t))
     out = stk.pop()
     assert stk.is_empty(), f"wtf stk={str(stk)} is not empty"
     return out
