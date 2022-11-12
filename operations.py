@@ -34,21 +34,15 @@ def split_exp(exp, ops):
     """
     tokens = []
     curr = ""
-    for c in exp:
-        if c == " ":
+    for c in exp+" ":
+        if c in ops or c in "() ":
             if curr != "":
                 tokens.append(curr)
-            curr = ""
-            continue
-        if c in ops or c in "()":
-            if curr != "":
-                tokens.append(curr)
-            tokens.append(c)
-            curr = ""
+                curr = ""
+            if c != " ":
+                tokens.append(c)
             continue
         curr += c
-    if curr != "":
-        tokens.append(curr)
     return tokens
 
 def infix_to_rpn(tokens, ops):
