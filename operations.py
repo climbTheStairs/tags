@@ -1,24 +1,23 @@
-from inspect import signature
 from stack import Stack
 
 # Operations are in reverse
 # because items are popped in reverse
 MATH_OPS = {
-    "+": lambda x, y : y+x,
-    "-": lambda x, y : y-x,
-    "*": lambda x, y : y*x,
-    "/": lambda x, y : y/x,
-    "%": lambda x, y : y%x,
+    "+": { "nargs": 2, "f": lambda x, y : y+x },
+    "-": { "nargs": 2, "f": lambda x, y : y-x },
+    "*": { "nargs": 2, "f": lambda x, y : y*x },
+    "/": { "nargs": 2, "f": lambda x, y : y/x },
+    "%": { "nargs": 2, "f": lambda x, y : y%x },
 }
 BOOL_OPS = {
-    "!": lambda x : not x,
-    "&": lambda x, y : y and x,
-    "|": lambda x, y : y or x,
+    "!": { "nargs": 1, "f": lambda x : not x },
+    "&": { "nargs": 2, "f": lambda x, y : y and x },
+    "|": { "nargs": 2, "f": lambda x, y : y or x },
 }
 BOOL_OPS_PY = {
-    "not": lambda x : not x,
-    "and": lambda x, y : y and x,
-    "or":  lambda x, y : y or x,
+    "not": { "nargs": 1, "f": lambda x : not x },
+    "and": { "nargs": 2, "f": lambda x, y : y and x },
+    "or":  { "nargs": 2, "f": lambda x, y : y or x },
 }
 
 def main():
@@ -63,10 +62,10 @@ def infix_to_rpn(tokens, ops):
     rpn = []
     ops_stk = Stack() # operators stack
     for t in tokens:
-        if t in ops and get_nargs(ops[t])==1:
+        if t in ops and ops[t]["nargs"]==1:
             ops_stk.push(t)
             continue
-        if t in ops and get_nargs(ops[t])==2:
+        if t in ops and ops[t]["nargs"]==2:
             while not ops_stk.is_empty() and ops_stk.peek() != "(":
                 rpn.append(ops_stk.pop())
             ops_stk.push(t)
@@ -84,7 +83,7 @@ def infix_to_rpn(tokens, ops):
                 rpn.append(op)
             """
             if not ops_stk.is_empty() and \
-                ops_stk.peek() in ops and get_nargs(ops[ops_stk.peek()])==1:
+                ops_stk.peek() in ops and ops[ops_stk.peek()]["nargs"]==1:
                 rpn.append(ops_stk.pop())
             """
             continue
@@ -94,14 +93,6 @@ def infix_to_rpn(tokens, ops):
         assert op != "(", "infix_to_rpn: unmatched \"(\""
         rpn.append(op)
     return rpn
-
-def get_nargs(f):
-    """
-    get number of arguments of f
-    f: function
-    return: int
-    """
-    return len(signature(f).parameters)
 
 def eval_rpn(rpn, ops, f = lambda x : x):
     """
@@ -116,10 +107,10 @@ def eval_rpn(rpn, ops, f = lambda x : x):
     for t in rpn:
         if t in ops:
             args = []
-            for _ in range(get_nargs(ops[t])):
+            for _ in range(ops[t]["nargs"]):
                 assert not stk.is_empty(), "eval_rpn: missing operand(s)"
                 args.append(stk.pop())
-            stk.push(ops[t](*args))
+            stk.push(ops[t]["f"](*args))
             continue
         stk.push(f(t))
     assert not stk.is_empty(), "eval_rpn: wtf, missing expression"
