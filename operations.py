@@ -3,21 +3,21 @@ from stack import Stack
 # Operations are in reverse
 # because items are popped in reverse
 MATH_OPS = {
-    "+": { "nargs": 2, "f": lambda x, y : y+x },
-    "-": { "nargs": 2, "f": lambda x, y : y-x },
-    "*": { "nargs": 2, "f": lambda x, y : y*x },
-    "/": { "nargs": 2, "f": lambda x, y : y/x },
-    "%": { "nargs": 2, "f": lambda x, y : y%x },
+    "+": (2, lambda x, y : y+x),
+    "-": (2, lambda x, y : y-x),
+    "*": (2, lambda x, y : y*x),
+    "/": (2, lambda x, y : y/x),
+    "%": (2, lambda x, y : y%x),
 }
 BOOL_OPS = {
-    "!": { "nargs": 1, "f": lambda x : not x },
-    "&": { "nargs": 2, "f": lambda x, y : y and x },
-    "|": { "nargs": 2, "f": lambda x, y : y or x },
+    "!": (1, lambda x : not x),
+    "&": (2, lambda x, y : y and x),
+    "|": (2, lambda x, y : y or x),
 }
 BOOL_OPS_PY = {
-    "not": { "nargs": 1, "f": lambda x : not x },
-    "and": { "nargs": 2, "f": lambda x, y : y and x },
-    "or":  { "nargs": 2, "f": lambda x, y : y or x },
+    "not": (1, lambda x : not x),
+    "and": (2, lambda x, y : y and x),
+    "or":  (2, lambda x, y : y or x),
 }
 
 def main():
@@ -62,10 +62,10 @@ def infix_to_rpn(tokens, ops):
     rpn = []
     ops_stk = Stack() # operators stack
     for t in tokens:
-        if t in ops and ops[t]["nargs"]==1:
+        if t in ops and ops[t][0]==1:
             ops_stk.push(t)
             continue
-        if t in ops and ops[t]["nargs"]==2:
+        if t in ops and ops[t][0]==2:
             while not ops_stk.is_empty() and ops_stk.peek() != "(":
                 rpn.append(ops_stk.pop())
             ops_stk.push(t)
@@ -83,7 +83,7 @@ def infix_to_rpn(tokens, ops):
                 rpn.append(op)
             """
             if not ops_stk.is_empty() and \
-                ops_stk.peek() in ops and ops[ops_stk.peek()]["nargs"]==1:
+                ops_stk.peek() in ops and ops[ops_stk.peek()][0]==1:
                 rpn.append(ops_stk.pop())
             """
             continue
@@ -107,10 +107,10 @@ def eval_rpn(rpn, ops, f = lambda x : x):
     for t in rpn:
         if t in ops:
             args = []
-            for _ in range(ops[t]["nargs"]):
+            for _ in range(ops[t][0]):
                 assert not stk.is_empty(), "eval_rpn: missing operand(s)"
                 args.append(stk.pop())
-            stk.push(ops[t]["f"](*args))
+            stk.push(ops[t][1](*args))
             continue
         stk.push(f(t))
     assert not stk.is_empty(), "eval_rpn: wtf, missing expression"
