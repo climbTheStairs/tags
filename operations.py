@@ -76,14 +76,17 @@ def infix_to_rpn(tokens, ops):
             continue
         if t == ")":
             while True:
-                assert not ops_stk.is_empty()
-                if ops_stk.peek() == "(":
+                assert not ops_stk.is_empty(), \
+                    "infix_to_rpn: unmatched \")\""
+                op = ops_stk.pop()
+                if op == "(":
                     break
-                rpn.append(ops_stk.pop())
-            assert ops_stk.pop() == "("
+                rpn.append(op)
+            """
             if not ops_stk.is_empty() and \
                 ops_stk.peek() in ops and get_nargs(ops[ops_stk.peek()])==1:
                 rpn.append(ops_stk.pop())
+            """
             continue
         rpn.append(t)
     while not ops_stk.is_empty():
