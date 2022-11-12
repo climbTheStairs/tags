@@ -91,7 +91,7 @@ def infix_to_rpn(tokens, ops):
         rpn.append(t)
     while not ops_stk.is_empty():
         op = ops_stk.pop()
-        assert op != "("
+        assert op != "(", "infix_to_rpn: unmatched \"(\""
         rpn.append(op)
     return rpn
 
@@ -111,15 +111,20 @@ def eval_rpn(rpn, ops, f = lambda x : x):
     f: function, apply f to each non-operator token
     return: object
     """
+    assert len(rpn) > 0, "eval_rpn: cannot evaluate empty expression"
     stk = Stack()
     for t in rpn:
         if t in ops:
-            args = (stk.pop() for _ in range(get_nargs(ops[t])))
+            args = []
+            for _ in range(get_nargs(ops[t])):
+                assert not stk.is_empty(), "eval_rpn: missing operand(s)"
+                args.append(stk.pop())
             stk.push(ops[t](*args))
             continue
         stk.push(f(t))
+    assert not stk.is_empty(), "eval_rpn: wtf, missing expression"
     out = stk.pop()
-    assert stk.is_empty(), f"wtf stk={str(stk)} is not empty"
+    assert stk.is_empty(), f"eval_rpn: wtf, stk={str(stk)} is not empty"
     return out
 
 if __name__ == "__main__":

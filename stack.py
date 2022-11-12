@@ -4,7 +4,8 @@ class Stack:
         self._len = 0
     def push(self, x):
         assert len(self._stk) >= self._len, \
-            f"wtf {len(self._stk)=} < {self._len=}, stk={str(self)}"
+            f"Stack.push: wtf " \
+            f"{len(self._stk)=} < {self._len=}, stk={str(self)}"
         if len(self._stk) > self._len:
             self._stk[self._len] = x
         else:
@@ -12,11 +13,13 @@ class Stack:
         self._len += 1
         return self
     def pop(self):
-        assert not self.is_empty()
+        assert not self.is_empty(), \
+            "Stack.pop: cannot pop empty stack"
         self._len -= 1
         return self._stk[self._len]
     def peek(self):
-        assert not self.is_empty()
+        assert not self.is_empty(), \
+            "Stack.peek: cannot peek empty stack"
         return self._stk[self._len-1]
     def is_empty(self):
         return self._len == 0
