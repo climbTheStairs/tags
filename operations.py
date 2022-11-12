@@ -15,6 +15,11 @@ BOOL_OPS = {
     "&": lambda x, y : y and x,
     "|": lambda x, y : y or x,
 }
+BOOL_OPS_PY = {
+    "not": lambda x : not x,
+    "and": lambda x, y : y and x,
+    "or":  lambda x, y : y or x,
+}
 
 def main():
     infix = input()
