@@ -1,6 +1,6 @@
 const { $, $$ } = stairz.getShortcuts()
 
-const bucket = [...$$(".bucket > li")].map($li => {
+const getBucket = async () => [...$$(".bucket > li")].map($li => {
 	const title = $li.$("a").textContent
 	const url = $li.$("a").href
 	const tags = [...$li.$(".tags").children]
@@ -8,7 +8,8 @@ const bucket = [...$$(".bucket > li")].map($li => {
 	return { $li, title, url, tags }
 })
 
-const filt = (q) => {
+const filt = async (q) => {
+	const bucket = await getBucket()
 	bucket.forEach(({ $li, tags }) => {
 		if (!tags.includes(q)) {
 			$li.css({ display: "none" })
