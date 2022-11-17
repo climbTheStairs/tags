@@ -2,13 +2,14 @@
 	background: transparent;
 	border: none;
 	box-sizing: border-box;
+	font: initial;
 	margin: 0;
 	padding: 0;
 }
 html, body {
 	height: 100%;
 	/*
-	Prevents margin-collapsing, see:
+	Prevents margin collapsing, see:
 	- https://www.w3.org/TR/CSS21/box.html#collapsing-margins
 	- https://stackoverflow.com/a/12989967/9281985
 	- https://stackoverflow.com/a/9519933/9281985
@@ -19,11 +20,14 @@ body {
 	background: #111;
 }
 #main {
+	height: calc(100% - 2*30px);
 	margin: 30px 10%;
 }
 #search {
 	background: #ddd;
-	font-size: 14px;
+	font-size: 1rem;
+	height: calc(1rem + 2*5px);
+	line-height: 1rem;
 	padding: 5px;
 	width: 100%;
 }
@@ -33,9 +37,9 @@ body {
 }
 .bucket {
 	background: #222;
-	border-top: 1px solid #333; /* TODO */
+	_border-top: 1px solid #333; /* TODO */
+	height: calc(100% - (1rem + 2*5px));
 	padding: 10px;
-	max-height: 500px; /* TODO */
 	overflow-y: auto;
 }
 .bucket > li {
