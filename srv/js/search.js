@@ -1,7 +1,4 @@
-const $ = document.querySelector.bind(document)
-const $$ = document.querySelectorAll.bind(document)
-Element.prototype.$ = Element.prototype.querySelector
-Element.prototype.$$ = Element.prototype.querySelectorAll
+const { $, $$ } = stairz.getShortcuts()
 
 const bucket = [...$$(".bucket > li")].map($li => {
 	const title = $li.$("a").textContent
@@ -14,10 +11,10 @@ const bucket = [...$$(".bucket > li")].map($li => {
 const filt = (q) => {
 	bucket.forEach(({ $li, tags }) => {
 		if (!tags.includes(q)) {
-			$li.style.display = "none"
+			$li.css({ display: "none" })
 			return
 		}
-		$li.style.display = ""
+		$li.css({ display: "" })
 	})
 }
 
@@ -27,6 +24,7 @@ $("#search").onkeydown = function({ key }) {
 		//console.time(q)
 		filt(q)
 		//console.timeEnd(q)
+		return
 	}
 }
 
