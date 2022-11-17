@@ -1,0 +1,51 @@
+* {
+	background: transparent;
+	border: none;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+html, body {
+	height: 100%;
+}
+body {
+	background: #111;
+}
+#main {
+	margin: 0 10%;
+}
+#search {
+	background: #ddd;
+	font-size: 14px;
+	padding: 5px;
+	width: 100%;
+}
+#search:focus {
+	background: #ccc;
+	outline: none;
+}
+.bucket {
+	background: #222;
+	padding: 10px;
+}
+.bucket > li {
+	display: flex;
+	justify-content: space-between;
+	padding: 5px;
+}
+.bucket > li:nth-child(2n) {
+	background: #333;
+}
+.bucket > li > a {
+	color: #eee;
+	text-decoration: none;
+}
+.tag {
+	background: none;
+	border: none;
+	color: #ddd;
+	font-size: small;
+}
+.tag::before {
+	content: "#";
+}
