@@ -7,12 +7,19 @@
 }
 html, body {
 	height: 100%;
+	/*
+	Prevents margin-collapsing, see:
+	- https://www.w3.org/TR/CSS21/box.html#collapsing-margins
+	- https://stackoverflow.com/a/12989967/9281985
+	- https://stackoverflow.com/a/9519933/9281985
+	*/
+	overflow: auto;
 }
 body {
 	background: #111;
 }
 #main {
-	margin: 0 10%;
+	margin: 30px 10%;
 }
 #search {
 	background: #ddd;
@@ -26,15 +33,16 @@ body {
 }
 .bucket {
 	background: #222;
+	border-top: 1px solid #333; /* TODO */
 	padding: 10px;
+	max-height: 500px; /* TODO */
+	overflow-y: auto;
 }
 .bucket > li {
+	border-bottom: 1px solid #333; /* TODO */
 	display: flex;
 	justify-content: space-between;
 	padding: 5px;
-}
-.bucket > li:nth-child(2n) {
-	background: #333;
 }
 .bucket > li > a {
 	color: #eee;
