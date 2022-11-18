@@ -10,8 +10,10 @@ cat << 'EOF'
 	<title>LinkBucket</title>
 	<meta charset="utf-8" />
 	<link rel="stylesheet" href="css/tag.css" />
+	<link rel="stylesheet" href="css/main.css" />
 </head>
 <body>
+	<div id="main">
 	<input type="text" id="search" />
 	<ul class="bucket">
 EOF
@@ -33,6 +35,7 @@ done
 
 cat << 'EOF'
 	</ul>
+	</div>
 	<script src="js/stairz.js"></script>
 	<script src="js/search.js"></script>
 </body>

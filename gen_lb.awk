@@ -8,8 +8,10 @@ BEGIN {
 "	<title>LinkBucket</title>\n" \
 "	<meta charset=\"utf-8\" />\n" \
 "	<link rel=\"stylesheet\" href=\"css/tag.css\" />\n" \
+"	<link rel=\"stylesheet\" href=\"css/main.css\" />\n" \
 "</head>\n" \
 "<body>\n" \
+"	<div id=\"main\">\n" \
 "	<input type=\"text\" id=\"search\" />\n" \
 "	<ul class=\"bucket\">\n"
 }
@@ -32,6 +34,7 @@ NR != 1 {
 
 END {
 	printf "	</ul>\n" \
+"	</div>\n" \
 "	<script src=\"js/stairz.js\"></script>\n" \
 "	<script src=\"js/search.js\"></script>\n" \
 "</body>\n" \
