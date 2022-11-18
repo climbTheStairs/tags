@@ -12,8 +12,8 @@ BEGIN {
 "</head>\n" \
 "<body>\n" \
 "	<div id=\"main\">\n" \
-"	<input type=\"text\" id=\"search\" />\n" \
-"	<ul class=\"bucket\">\n"
+"		<input type=\"text\" id=\"search\" />\n" \
+"		<ul class=\"bucket\">\n"
 }
 
 NR != 1 {
@@ -21,19 +21,20 @@ NR != 1 {
 	url=$2
 	split($3, tags, ",")
 
-	printf "		<li>\n" \
-"			<a href=\"%s\">%s</a>\n" \
-"			<span class=\"tags\">\n", url, title
+	printf "			<li>\n" \
+"				<a href=\"%s\">%s</a>\n" \
+"				<span class=\"tags\">\n", url, title
 	for (i in tags) {
 		printf \
-"				<span class=\"tag\">%s</span>\n", tags[i]
+"					<span class=\"tag\">%s</span>\n",
+			tags[i]
 	}
-	printf "			</span>\n" \
-"		</li>\n"
+	printf "				</span>\n" \
+"			</li>\n"
 }
 
 END {
-	printf "	</ul>\n" \
+	printf "		</ul>\n" \
 "	</div>\n" \
 "	<script src=\"js/stairz.js\"></script>\n" \
 "	<script src=\"js/search.js\"></script>\n" \

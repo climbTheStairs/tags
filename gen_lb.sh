@@ -14,27 +14,27 @@ cat << 'EOF'
 </head>
 <body>
 	<div id="main">
-	<input type="text" id="search" />
-	<ul class="bucket">
+		<input type="text" id="search" />
+		<ul class="bucket">
 EOF
 
 tail -n +2 "$f" | while IFS="$ht" read -r title url tags; do
 	cat << EOF
-		<li>
-			<a href="$url">$title</a>
-			<span class="tags">
+			<li>
+				<a href="$url">$title</a>
+				<span class="tags">
 EOF
 	printf '%s' "$tags" | awk -v RS=, '{
-	printf "\t\t\t\t<span class=\"tag\">%s</span>\n", $0
+	printf "\t\t\t\t\t<span class=\"tag\">%s</span>\n", $0
 }'
 	cat << EOF
-			</span>
-		</li>
+				</span>
+			</li>
 EOF
 done
 
 cat << 'EOF'
-	</ul>
+		</ul>
 	</div>
 	<script src="js/stairz.js"></script>
 	<script src="js/search.js"></script>
