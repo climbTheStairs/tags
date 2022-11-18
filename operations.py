@@ -65,7 +65,7 @@ def infix_to_rpn(tokens, ops):
     see <https://en.wikipedia.org/wiki/Shunting_yard_algorithm?oldid=1102884909#The_algorithm_in_detail>
     tokens: iterable<str>
     ops: dict<str, function>
-    return: list<str>, Exception
+    return: list<str>, ValueError
     """
     rpn = []
     ops_stk = Stack() # operators stack
@@ -76,7 +76,7 @@ def infix_to_rpn(tokens, ops):
         if t in ops and ops[t][0]==2:
             while True:
                 op, e = ops_stk.pop()
-                if e is not None:
+                if type(e) == IndexError:
                     break
                 if op == "(":
                     ops_stk.push(op)
@@ -90,8 +90,8 @@ def infix_to_rpn(tokens, ops):
         if t == ")":
             while True:
                 op, e = ops_stk.pop()
-                if e is not None:
-                    return rpn, Exception("infix_to_rpn: unmatched \")\"")
+                if type(e) == IndexError:
+                    return rpn, ValueError("infix_to_rpn: unmatched \")\"")
                 if op == "(":
                     break
                 rpn.append(op)
@@ -99,10 +99,10 @@ def infix_to_rpn(tokens, ops):
         rpn.append(t)
     while True:
         op, e = ops_stk.pop()
-        if e is not None:
+        if type(e) == IndexError:
             break
         if op == "(":
-            return rpn, Exception("infix_to_rpn: unmatched \"(\"")
+            return rpn, ValueError("infix_to_rpn: unmatched \"(\"")
         rpn.append(op)
     return rpn, None
 
@@ -112,18 +112,18 @@ def eval_rpn(rpn, ops, f = lambda x : x):
     rpn: iterable<str>
     ops: dict<str, function>
     f: function, apply f to each non-operator token
-    return: object, Exception
+    return: object, ValueError
     """
     if len(rpn) == 0:
-        return None, Exception("eval_rpn: empty expression")
+        return None, ValueError("eval_rpn: empty expression")
     stk = Stack()
     for t in rpn:
         if t in ops:
             args = []
             for _ in range(ops[t][0]):
                 arg, e = stk.pop()
-                if e is not None:
-                    return None, Exception("eval_rpn: " \
+                if type(e) == IndexError:
+                    return None, ValueError("eval_rpn: " \
                         f"missing operand(s) for operation \"{t}\"")
                 args.append(arg)
             stk.push(ops[t][1](*args))
@@ -131,7 +131,7 @@ def eval_rpn(rpn, ops, f = lambda x : x):
         stk.push(f(t))
     out, _ = stk.pop() # stk cannot be possibly empty here
     if not stk.is_empty():
-        return None, Exception("eval_rpn: " \
+        return None, ValueError("eval_rpn: " \
             "expression contains multiple unrelated values")
     return out, None
 

@@ -16,7 +16,7 @@ class Stack:
 
     def pop(self):
         if self.is_empty():
-            return None, Exception("Stack.pop: empty stack")
+            return None, IndexError("Stack.pop: empty stack")
         self._len -= 1
         x = self._stk[self._len]
         self._stk[self._len] = None
@@ -24,7 +24,7 @@ class Stack:
 
     def peek(self):
         if self.is_empty():
-            return None, Exception("Stack.peek: empty stack")
+            return None, IndexError("Stack.peek: empty stack")
         return self._stk[self._len-1], None
 
     def is_empty(self):

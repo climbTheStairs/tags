@@ -16,7 +16,7 @@ const getBucket = async () => [...$$(".bucket > li")].map($li => {
 
 const evalRpn = (rpn, ops, f = x=>x) => {
 	if (rpn.length == 0)
-		return [null, Error("evalRpn: empty expression")]
+		return [null, RangeError("evalRpn: empty expression")]
 	const stk = []
 	for (const t of rpn) {
 		if (ops.hasOwnProperty(t)) {
@@ -24,7 +24,7 @@ const evalRpn = (rpn, ops, f = x=>x) => {
 			for (let i = 0; i < ops[t].arity; i++) {
 				arg = stk.pop()
 				if (typeof arg === "undefined")
-					return [null, Error("evalRpn: " +
+					return [null, RangeError("evalRpn: " +
 						`missing operand(s) for operation "${t}"`)]
 				args.push(arg)
 			}
@@ -35,7 +35,7 @@ const evalRpn = (rpn, ops, f = x=>x) => {
 	}
 	const out = stk.pop()
 	if (stk.length !== 0)
-		return [null, Error("evalRpn: " +
+		return [null, RangeError("evalRpn: " +
 			"expression contains multiple unrelated values")]
 	return [out, null]
 }
@@ -43,7 +43,7 @@ const evalRpn = (rpn, ops, f = x=>x) => {
 const filt = async (q) => {
 	const bucket = await getBucket()
 	bucket.forEach(({ $li, tags }) => {
-		if (!evalRpn(q.split(" "), BOOL_OPS, x=>tags.includes(x))) {
+		if (!evalRpn(q.split(" "), BOOL_OPS, x=>tags.includes(x)))
 			$li.css({ display: "none" })
 			return
 		}
