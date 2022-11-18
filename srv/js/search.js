@@ -1,9 +1,9 @@
 const { $, $$ } = stairz.getShortcuts()
 
 const BOOL_OPS = {
-    "!": { arity: 1, op: x=>!x },
-    "&": { arity: 2, op: (x, y)=>y&&x },
-    "|": { arity: 2, op: (x, y)=>y||x },
+	"!": { arity: 1, op: x=>!x },
+	"&": { arity: 2, op: (x, y)=>y&&x },
+	"|": { arity: 2, op: (x, y)=>y||x },
 }
 
 const getBucket = async () => [...$$(".bucket > li")].map($li => {
@@ -15,34 +15,34 @@ const getBucket = async () => [...$$(".bucket > li")].map($li => {
 })
 
 const evalRpn = (rpn, ops, f = x=>x) => {
-	if (rpn.length <= 0)
-		throw Error("evalRpn: cannot evaluate empty expression")
+	if (rpn.length == 0)
+		return [null, Error("evalRpn: empty expression")]
 	const stk = []
-	rpn.forEach(t => {
+	for (const t of rpn) {
 		if (ops.hasOwnProperty(t)) {
 			const args = []
 			for (let i = 0; i < ops[t].arity; i++) {
-				if (stk.length === 0)
-					throw Error("evalRpn: missing operand(s)")
-				args.push(stk.pop())
+				arg = stk.pop()
+				if (typeof arg === "undefined")
+					return [null, Error("evalRpn: " +
+						`missing operand(s) for operation "${t}"`)]
+				args.push(arg)
 			}
 			stk.push(ops[t].op(...args))
-			return
+			continue
 		}
 		stk.push(f(t))
-	})
-	if (stk.length === 0)
-		throw Error("evalRpn: wtf, missing expression")
+	}
 	const out = stk.pop()
 	if (stk.length !== 0)
-		throw Error(`evalRpn: wtf, stk=[${stk}] is not empty`)
-	return out
+		return [null, Error("evalRpn: " +
+			"expression contains multiple unrelated values")]
+	return [out, null]
 }
 
 const filt = async (q) => {
 	const bucket = await getBucket()
 	bucket.forEach(({ $li, tags }) => {
-		//if (!tags.includes(q)) {
 		if (!evalRpn(q.split(" "), BOOL_OPS, x=>tags.includes(x))) {
 			$li.css({ display: "none" })
 			return

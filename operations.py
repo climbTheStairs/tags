@@ -1,3 +1,5 @@
+from os import sys
+
 from stack import Stack
 
 # Operations are in reverse
@@ -22,12 +24,18 @@ BOOL_OPS_PY = {
 
 def main():
     infix = input()
-    infix = "1+2+(3+4+(5+6)+7+(8+(9)))+2+3+(3+(3+(3+((3+3)+3)+3)+3))" \
-        if infix == "" else infix
+    #infix = "1+2+(3+4+(5+6)+7+(8+(9)))+2+3+(3+(3+(3+((3+3)+3)+3)+3))"
     infix = split_exp(infix, MATH_OPS)
-    rpn = infix_to_rpn(infix, MATH_OPS)
-    print(" ".join(rpn))
-    print(eval_rpn(rpn, MATH_OPS, float))
+
+    rpn, e = infix_to_rpn(infix, MATH_OPS)
+    if e is not None:
+        sys.exit(e)
+    print("RPN:", " ".join(rpn))
+
+    res, e = eval_rpn(rpn, MATH_OPS, float)
+    if e is not None:
+        sys.exit(e)
+    print("Result:", res)
 
 def split_exp(exp, ops):
     """
@@ -39,7 +47,7 @@ def split_exp(exp, ops):
     tokens = []
     curr = ""
     for c in exp+" ":
-        if c in ops or c in "() ":
+        if c in ops or c in "()" or c == " ":
             if curr != "":
                 tokens.append(curr)
                 curr = ""
@@ -53,11 +61,11 @@ def infix_to_rpn(tokens, ops):
     """
     convert list of tokens of expression in infix notation
     to reverse Polish notation (RPN)
-    using shunting yard algorithm invented by Edsger Dijkstra;
+    using Dijkstra's shunting yard algorithm;
     see <https://en.wikipedia.org/wiki/Shunting_yard_algorithm?oldid=1102884909#The_algorithm_in_detail>
     tokens: iterable<str>
     ops: dict<str, function>
-    return: list<str>
+    return: list<str>, Exception
     """
     rpn = []
     ops_stk = Stack() # operators stack
@@ -66,8 +74,14 @@ def infix_to_rpn(tokens, ops):
             ops_stk.push(t)
             continue
         if t in ops and ops[t][0]==2:
-            while not ops_stk.is_empty() and ops_stk.peek() != "(":
-                rpn.append(ops_stk.pop())
+            while True:
+                op, e = ops_stk.pop()
+                if e is not None:
+                    break
+                if op == "(":
+                    ops_stk.push(op)
+                    break
+                rpn.append(op)
             ops_stk.push(t)
             continue
         if t == "(":
@@ -75,24 +89,22 @@ def infix_to_rpn(tokens, ops):
             continue
         if t == ")":
             while True:
-                assert not ops_stk.is_empty(), \
-                    "infix_to_rpn: unmatched \")\""
-                op = ops_stk.pop()
+                op, e = ops_stk.pop()
+                if e is not None:
+                    return rpn, Exception("infix_to_rpn: unmatched \")\"")
                 if op == "(":
                     break
                 rpn.append(op)
-            """
-            if not ops_stk.is_empty() and \
-                ops_stk.peek() in ops and ops[ops_stk.peek()][0]==1:
-                rpn.append(ops_stk.pop())
-            """
             continue
         rpn.append(t)
-    while not ops_stk.is_empty():
-        op = ops_stk.pop()
-        assert op != "(", "infix_to_rpn: unmatched \"(\""
+    while True:
+        op, e = ops_stk.pop()
+        if e is not None:
+            break
+        if op == "(":
+            return rpn, Exception("infix_to_rpn: unmatched \"(\"")
         rpn.append(op)
-    return rpn
+    return rpn, None
 
 def eval_rpn(rpn, ops, f = lambda x : x):
     """
@@ -100,23 +112,28 @@ def eval_rpn(rpn, ops, f = lambda x : x):
     rpn: iterable<str>
     ops: dict<str, function>
     f: function, apply f to each non-operator token
-    return: object
+    return: object, Exception
     """
-    assert len(rpn) > 0, "eval_rpn: cannot evaluate empty expression"
+    if len(rpn) == 0:
+        return None, Exception("eval_rpn: empty expression")
     stk = Stack()
     for t in rpn:
         if t in ops:
             args = []
             for _ in range(ops[t][0]):
-                assert not stk.is_empty(), "eval_rpn: missing operand(s)"
-                args.append(stk.pop())
+                arg, e = stk.pop()
+                if e is not None:
+                    return None, Exception("eval_rpn: " \
+                        f"missing operand(s) for operation \"{t}\"")
+                args.append(arg)
             stk.push(ops[t][1](*args))
             continue
         stk.push(f(t))
-    assert not stk.is_empty(), "eval_rpn: wtf, missing expression"
-    out = stk.pop()
-    assert stk.is_empty(), f"eval_rpn: wtf, stk={str(stk)} is not empty"
-    return out
+    out, _ = stk.pop() # stk cannot be possibly empty here
+    if not stk.is_empty():
+        return None, Exception("eval_rpn: " \
+            "expression contains multiple unrelated values")
+    return out, None
 
 if __name__ == "__main__":
     main()

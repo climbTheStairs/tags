@@ -1,13 +1,20 @@
+from os import sys
+
 from operations import split_exp, infix_to_rpn, eval_rpn, BOOL_OPS
 
 def main():
     infix = split_exp(input(), BOOL_OPS)
-    rpn = infix_to_rpn(infix, BOOL_OPS)
+    rpn, e = infix_to_rpn(infix, BOOL_OPS)
+    if e is not None:
+        sys.exit(e)
 
     head, items = get_items("songs.tsv")
     print("\t".join(head))
     for name, by, tags in items:
-        if eval_rpn(rpn, BOOL_OPS, lambda x : x in tags):
+        is_matching, e = eval_rpn(rpn, BOOL_OPS, lambda x : x in tags)
+        if e is not None:
+            sys.exit(e)
+        if is_matching:
             print(name, ", ".join(by), " ".join(tags), sep="\t")
 
 def get_items(fname):
