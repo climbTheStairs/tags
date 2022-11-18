@@ -1,3 +1,5 @@
+"use strict"
+
 const { $, $$ } = stairz.getShortcuts()
 
 const getBucket = async () => [...$$(".bucket > li")].map($li => {

@@ -1,3 +1,5 @@
+"use strict"
+
 const BOOL_OPS = {
 	"!": { arity: 1, op: x=>!x },
 	"&": { arity: 2, op: (x, y)=>y&&x },

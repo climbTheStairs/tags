@@ -1,3 +1,5 @@
+"use strict"
+
 class Stack {
 	constructor() {
 		this._stk = []
