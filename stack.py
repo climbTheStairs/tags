@@ -16,7 +16,9 @@ class Stack:
         assert not self.is_empty(), \
             "Stack.pop: cannot pop empty stack"
         self._len -= 1
-        return self._stk[self._len]
+        x = self._stk[self._len]
+        self._stk[self._len] = None
+        return x
     def peek(self):
         assert not self.is_empty(), \
             "Stack.peek: cannot peek empty stack"
