@@ -14,6 +14,14 @@ const getBucket = async () => [...$$(".bucket > li")].map($li => {
 	return { $li, title, url, tags }
 })
 
+const splitExp = (exp, ops) => {
+	return exp.split(" ").filter(x => x.length !== 0)
+}
+
+const infixToRpn = (tokens, ops) => {
+	return [tokens, null]
+}
+
 const evalRpn = (rpn, ops, f = x=>x) => {
 	if (rpn.length == 0)
 		return [null, RangeError("evalRpn: empty expression")]
@@ -42,18 +50,33 @@ const evalRpn = (rpn, ops, f = x=>x) => {
 
 const filt = async (q) => {
 	const bucket = await getBucket()
-	bucket.forEach(({ $li, tags }) => {
-		if (!evalRpn(q.split(" "), BOOL_OPS, x=>tags.includes(x)))
-			$li.css({ display: "none" })
+	const infix = splitExp(q, BOOL_OPS)
+	const [rpn, e] = infixToRpn(infix, BOOL_OPS)
+	if (e !== null) {
+		window.alert(e.message)
+		return
+	}
+	for (const { $li, tags } of bucket) {
+		const [isMatching, e] = evalRpn(
+			rpn,
+			BOOL_OPS,
+			tags.includes.bind(tags),
+		)
+		if (e !== null) {
+			window.alert(e.message)
 			return
 		}
+		if (!isMatching) {
+			$li.css({ display: "none" })
+			continue
+		}
 		$li.css({ display: "" })
-	})
+	}
 }
 
 $("#search").onkeydown = function({ key }) {
 	if (key === "Enter") {
-		const q = this.value.trim().toLowerCase()
+		const q = this.value.toLowerCase()
 		//console.time(q)
 		filt(q)
 		//console.timeEnd(q)
