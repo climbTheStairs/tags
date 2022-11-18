@@ -10,7 +10,7 @@ const getBucket = async () => [...$$(".bucket > li")].map($li => {
 
 const filt = async (q) => {
 	const bucket = await getBucket()
-	const infix = splitExp(q, BOOL_OPS)
+	const infix = splitExp(q, Object.keys(BOOL_OPS))
 	const [rpn, e] = infixToRpn(infix, BOOL_OPS)
 	if (e !== null) {
 		window.alert(e.message)
