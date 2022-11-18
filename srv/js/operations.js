@@ -16,7 +16,7 @@ const splitExp = (exp, ops) => {
 	const tokens = []
 	let curr = ""
 	for (const c of exp+" ") {
-		if (ops.includes(c) || "()".includes("c") || c === " ") {
+		if (ops.includes(c) || "()".includes(c) || c === " ") {
 			if (curr !== "") {
 				tokens.push(curr)
 				curr = ""
