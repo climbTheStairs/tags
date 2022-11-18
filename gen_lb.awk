@@ -37,6 +37,7 @@ END {
 	printf "		</ul>\n" \
 "	</div>\n" \
 "	<script src=\"js/stairz.js\"></script>\n" \
+"	<script src=\"js/operations.js\"></script>\n" \
 "	<script src=\"js/search.js\"></script>\n" \
 "</body>\n" \
 "</html>\n"

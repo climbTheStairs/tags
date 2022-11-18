@@ -37,6 +37,7 @@ cat << 'EOF'
 		</ul>
 	</div>
 	<script src="js/stairz.js"></script>
+	<script src="js/operations.js"></script>
 	<script src="js/search.js"></script>
 </body>
 </html>
