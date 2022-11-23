@@ -31,6 +31,40 @@ const splitExp = (exp, ops) => {
 	return tokens
 }
 
+const processOp = (rpn, opsStk) => {
+	while (true) {
+		const [op, e] = opsStk.peek()
+		if (e instanceof TypeError)
+			return
+		if (op === "(")
+			return
+		const [,] = opsStk.pop()
+		rpn.push(op)
+	}
+}
+
+const processParen = (rpn, opsStk) => {
+	while (true) {
+		const [op, e] = opsStk.pop()
+		if (e instanceof TypeError)
+			return RangeError(`infixToRpn: unmatched ")"`)
+		if (op === "(")
+			return null
+		rpn.push(op)
+	}
+}
+
+const processEnd = (rpn, opsStk) => {
+	while (true) {
+		const [op, e] = opsStk.pop()
+		if (e instanceof TypeError)
+			return null
+		if (op === "(")
+			return RangeError(`infixToRpn: unmatched "("`)
+		rpn.push(op)
+	}
+}
+
 const infixToRpn = (tokens, ops) => {
 	/*
 	convert list of tokens of expression in infix notation
@@ -49,15 +83,7 @@ const infixToRpn = (tokens, ops) => {
 			continue
 		}
 		if (ops.hasOwnProperty(t) && ops[t].arity===2) {
-			while (true) {
-				const [op, e] = opsStk.peek()
-				if (e instanceof TypeError)
-					break
-				if (op === "(")
-					break
-				const [,] = opsStk.pop()
-				rpn.push(op)
-			}
+			processOp(rpn, opsStk)
 			opsStk.push(t)
 			continue
 		}
@@ -66,27 +92,27 @@ const infixToRpn = (tokens, ops) => {
 			continue
 		}
 		if (t == ")") {
-			while (true) {
-				const [op, e] = opsStk.pop()
-				if (e instanceof TypeError)
-					return [rpn, RangeError(`infixToRpn: unmatched ")"`)]
-				if (op === "(")
-					break
-				rpn.push(op)
-			}
+			const e = processParen(rpn, opsStk)
+			if (e instanceof RangeError)
+				return [rpn, e]
 			continue
 		}
 		rpn.push(t)
 	}
-	while (true) {
-		const [op, e] = opsStk.pop()
+	return [rpn, processEnd(rpn, opsStk)]
+}
+
+const pushOpRes = (stk, op) => {
+	const args = []
+	for (let i = 0; i < op.arity; i++) {
+		const [arg, e] = stk.pop()
 		if (e instanceof TypeError)
-			break
-		if (op === "(")
-			return [rpn, RangeError(`infixToRpn: unmatched "("`)]
-		rpn.push(op)
+			return RangeError("evalRpn: " +
+				`missing operand(s) for operation "${t}"`)
+		args.push(arg)
 	}
-	return [rpn, null]
+	stk.push(op.op(...args))
+	return null
 }
 
 const evalRpn = (rpn, ops, f = x=>x) => {
@@ -102,15 +128,9 @@ const evalRpn = (rpn, ops, f = x=>x) => {
 	const stk = new Stack()
 	for (const t of rpn) {
 		if (ops.hasOwnProperty(t)) {
-			const args = []
-			for (let i = 0; i < ops[t].arity; i++) {
-				const [arg, e] = stk.pop()
-				if (e instanceof TypeError)
-					return [null, RangeError("evalRpn: " +
-						`missing operand(s) for operation "${t}"`)]
-				args.push(arg)
-			}
-			stk.push(ops[t].op(...args))
+			const e = pushOpRes(stk, ops[t])
+			if (e instanceof RangeError)
+				return [null, e]
 			continue
 		}
 		stk.push(f(t))

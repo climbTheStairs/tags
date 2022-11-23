@@ -57,6 +57,34 @@ def split_exp(exp, ops):
         curr += c
     return tokens
 
+def process_op(rpn, ops_stk):
+    while True:
+        op, e = ops_stk.peek()
+        if type(e) == IndexError:
+            return
+        if op == "(":
+            return
+        op, _ = ops_stk.pop()
+        rpn.append(op)
+
+def process_paren(rpn, ops_stk):
+    while True:
+        op, e = ops_stk.pop()
+        if type(e) == IndexError:
+            return ValueError("infix_to_rpn: unmatched \")\"")
+        if op == "(":
+            return None
+        rpn.append(op)
+
+def process_end(rpn, ops_stk):
+    while True:
+        op, e = ops_stk.pop()
+        if type(e) == IndexError:
+            return None
+        if op == "(":
+            return ValueError("infix_to_rpn: unmatched \"(\"")
+        rpn.append(op)
+
 def infix_to_rpn(tokens, ops):
     """
     convert list of tokens of expression in infix notation
@@ -74,39 +102,32 @@ def infix_to_rpn(tokens, ops):
             ops_stk.push(t)
             continue
         if t in ops and ops[t]["arity"]==2:
-            while True:
-                op, e = ops_stk.peek()
-                if type(e) == IndexError:
-                    break
-                if op == "(":
-                    break
-                op, _ = ops_stk.pop()
-                rpn.append(op)
+            process_op(rpn, ops_stk)
             ops_stk.push(t)
             continue
         if t == "(":
             ops_stk.push(t)
             continue
         if t == ")":
-            while True:
-                op, e = ops_stk.pop()
-                if type(e) == IndexError:
-                    return rpn, ValueError("infix_to_rpn: unmatched \")\"")
-                if op == "(":
-                    break
-                rpn.append(op)
+            e = process_paren(rpn, ops_stk)
+            if type(e) == ValueError:
+                return rpn, e
             continue
         rpn.append(t)
-    while True:
-        op, e = ops_stk.pop()
-        if type(e) == IndexError:
-            break
-        if op == "(":
-            return rpn, ValueError("infix_to_rpn: unmatched \"(\"")
-        rpn.append(op)
-    return rpn, None
+    return rpn, process_end(rpn, ops_stk)
 
-def eval_rpn(rpn, ops, f = lambda x : x):
+def push_op_res(stk, op):
+    args = []
+    for _ in range(op["arity"]):
+        arg, e = stk.pop()
+        if type(e) == IndexError:
+            return ValueError("eval_rpn: " \
+                f"missing operand(s) for operation \"{t}\"")
+        args.append(arg)
+    stk.push(op["op"](*args))
+    return None
+
+def eval_rpn(rpn, ops, f=lambda x : x):
     """
     evaluate expression in RPN
     rpn: iterable<str>
@@ -119,14 +140,9 @@ def eval_rpn(rpn, ops, f = lambda x : x):
     stk = Stack()
     for t in rpn:
         if t in ops:
-            args = []
-            for _ in range(ops[t]["arity"]):
-                arg, e = stk.pop()
-                if type(e) == IndexError:
-                    return None, ValueError("eval_rpn: " \
-                        f"missing operand(s) for operation \"{t}\"")
-                args.append(arg)
-            stk.push(ops[t]["op"](*args))
+            e = push_op_res(stk, ops[t])
+            if e is not None:
+                return None, e
             continue
         stk.push(f(t))
     out, _ = stk.pop() # stk cannot be possibly empty here
