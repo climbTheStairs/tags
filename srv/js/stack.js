@@ -32,7 +32,7 @@ class Stack {
 	}
 
 	toString() {
-		return "<" + this._stk.slice(this._len).join(", ") + ">"
+		return "<" + this._stk.slice(0, this._len).join(", ") + ">"
 	}
 }
 
