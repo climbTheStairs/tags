@@ -60,7 +60,7 @@ def split_exp(exp, ops):
 def process_op(rpn, ops_stk):
     while True:
         op, e = ops_stk.peek()
-        if type(e) == IndexError:
+        if isinstance(e, IndexError):
             return
         if op == "(":
             return
@@ -70,7 +70,7 @@ def process_op(rpn, ops_stk):
 def process_paren(rpn, ops_stk):
     while True:
         op, e = ops_stk.pop()
-        if type(e) == IndexError:
+        if isinstance(e, IndexError):
             return ValueError("infix_to_rpn: unmatched \")\"")
         if op == "(":
             return None
@@ -79,7 +79,7 @@ def process_paren(rpn, ops_stk):
 def process_end(rpn, ops_stk):
     while True:
         op, e = ops_stk.pop()
-        if type(e) == IndexError:
+        if isinstance(e, IndexError):
             return None
         if op == "(":
             return ValueError("infix_to_rpn: unmatched \"(\"")
@@ -110,7 +110,7 @@ def infix_to_rpn(tokens, ops):
             continue
         if t == ")":
             e = process_paren(rpn, ops_stk)
-            if type(e) == ValueError:
+            if isinstance(e, ValueError):
                 return rpn, e
             continue
         rpn.append(t)
@@ -120,7 +120,7 @@ def push_op_res(stk, op):
     args = []
     for _ in range(op["arity"]):
         arg, e = stk.pop()
-        if type(e) == IndexError:
+        if isinstance(e, IndexError):
             return ValueError("eval_rpn: " \
                 f"missing operand(s) for operation \"{t}\"")
         args.append(arg)

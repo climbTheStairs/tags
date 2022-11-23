@@ -4,9 +4,6 @@ class Stack:
         self._len = 0
 
     def push(self, x):
-        assert len(self._stk) >= self._len, \
-            f"Stack.push: wtf " \
-            f"{len(self._stk)=} < {self._len=}, stk={str(self)}"
         if len(self._stk) > self._len:
             self._stk[self._len] = x
         else:
