@@ -2,7 +2,7 @@
 
 const { $, $$ } = stairz.getShortcuts()
 
-const getBucket = async () => [...$$(".bucket > li")].map($li => {
+const bucket = [...$$(".bucket > li")].map($li => {
 	const title = $li.$("a").textContent
 	const url = $li.$("a").href
 	const tags = [...$li.$(".tags").children]
@@ -11,7 +11,6 @@ const getBucket = async () => [...$$(".bucket > li")].map($li => {
 })
 
 const filt = async (q) => {
-	const bucket = await getBucket()
 	const infix = splitExp(q, Object.keys(BOOL_OPS))
 	const [rpn, e] = infixToRpn(infix, BOOL_OPS)
 	if (e !== null) {
