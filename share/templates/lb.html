@@ -14,7 +14,7 @@
 			<li>
 				<a href="{{.url}}">{{.title}}</a>
 				<span class="tags">
-					{{- range toStrSlice .tags}}
+					{{- range .tags | toStrSlice}}
 					<span class="tag">{{.}}</span>
 					{{- end}}
 				</span>
