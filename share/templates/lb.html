@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>LinkBucket</title>
+	<meta charset="utf-8" />
+	<link rel="stylesheet" href="css/tag.css" />
+	<link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+	<div id="main">
+		<input type="text" id="search" />
+		<ul class="bucket">
+			{{- range .}}
+			<li>
+				<a href="{{.url}}">{{.title}}</a>
+				<span class="tags">
+					{{- range toStrSlice .tags}}
+					<span class="tag">{{.}}</span>
+					{{- end}}
+				</span>
+			</li>
+			{{- end}}
+		</ul>
+	</div>
+	<script src="js/stairz.js"></script>
+	<script src="js/stack.js"></script>
+	<script src="js/operations.js"></script>
+	<script src="js/search.js"></script>
+</body>
+</html>
